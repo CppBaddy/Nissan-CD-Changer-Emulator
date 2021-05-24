@@ -6,5 +6,4 @@ and steering wheel controls supported.
 
 Based on DFPlayer Mini board and ATTiny85.
 
-Schematics and PCB design can be found here:
-  https://easyeda.com/Yulay/nissan-cd-changer-emulator
+Schematics and PCB design can be found [here](https://easyeda.com/Yulay/nissan-cd-changer-emulator)
