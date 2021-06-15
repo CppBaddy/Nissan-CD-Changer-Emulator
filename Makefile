@@ -2,6 +2,10 @@ CC=avr-gcc
 
 DEVICE=85
 
+EFUSE=0xff
+HFUSE=0xdf
+LFUSE=0x62
+
 CFLAGS=-g -std=c11 -Os -Wall -mcall-prologues -mmcu=attiny$(DEVICE) -DF_CPU=8000000
 ## Use short (8-bit) data types
 CFLAGS += -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums
@@ -27,6 +31,9 @@ all : program
 program : flash eeprom
 
 #program : flash
+
+fuse :
+	$(UISP) -p m$(DEVICE) -c USBasp -v -U hfuse:w:${HFUSE}:m -U lfuse:w:${LFUSE}:m 
 
 flash : $(TARGET).hex
 	$(UISP) -p t$(DEVICE) -c USBasp -v -U flash:w:$(TARGET).hex:i
@@ -55,4 +62,4 @@ clean :
 	@rm -f *.hex *.eep *.elf *.o
 
 help :
-	@echo "make [help | clean | build | eeprom | flash | program]"
+	@echo "make [help | clean | build | eeprom | flash | program | fuse]"
