@@ -1,0 +1,492 @@
+Serial communication: 9600 baud, 8 bit, even parity, 1 stop bit (1start, 8data, 1parity, 1stop = 11bit)
+CRC XOR all bytes (skip zeroes)
+
+CD => /REQ (set active) request attention
+HU => 06 ACK            you can speak now
+CD => status            my status
+HU => 06 ACK            ok, got it
+...
+CD => REQ (set idle)    I am done
+CD => 04 EOT            going offline
+
+=============================================================
+Head unit to cd changer
+
+02 XX XX 03 YY - Function request
+
+02 03 - Cancel command
+
+where:
+  02 - STX start text
+  XX XX - function in ascii, i.e. 36 32 is #62
+  	0  initialize
+    1  get parameters
+
+  	60 play [36 30]
+
+  	61
+
+	62 stop play [36 32]
+
+        63 next track [36 33]
+        64 prev track [36 34]
+
+        65 fast forward pressed  [36 35]
+        66 fast forward released [36 36]
+        67 fast reverse pressed  [36 37]
+        68 fast reverse released [36 38]
+
+        6: next cd [36 3a]
+        6; next cd [36 3b]
+
+	6c program off [36 ?]
+	6d program one track
+	6e program all random
+	
+	'r' scan disks [0x72]
+
+  03 - ETX end text
+  YY - CRC
+
+04 - EOT end of translation
+06 - ACK acknowledgement
+10 - DLE start/end of raw data
+
+============================================================
+Changer to head unit
+
+Commands:
+04 - EOT end of transmission
+
+06 - ACK
+
+10 - DLE data link escape
+
+Message:
+10 02 XX [xx xx] 10 03 CRC
+
+where XX
+      0 initializing  [30]
+      1 parameters    [31 3f 80 20 01 00]
+      2
+      3 processing cmd [33 xx xx]
+
+
+Initialize
+==========================
+/REQ                     <= each 12ms, timeout at 10ms. Repeat till HU answers
+REQ
+
+/REQ                     <= timeout at 10ms.
+HU: 02 30 03 33
+CD: 06
+HU: 04
+REQ
+
+/REQ
+HU: 06
+CD: 02 30 03 33
+HU: 06
+REQ
+CD: 04
+
+HU: 02 31 03 32
+CD: 10 02 31 3f 80 20 01 00 10 03 bc
+HU: 06
+CD: 04
+
+HU: 02 36 32 03 07
+CD: 10 02 33 20 01 10 03 01
+HU: 06
+CD: 04
+
+
+<=> repeats each 5 seconds
+
+HU: 02 30 03 33
+CD: 06
+HU: 04
+
+/REQ
+HU: 06
+CD: 02 30 03 33
+HU: 06
+REQ
+CD: 04
+
+HU: 02 31 03 32
+CD: 10 02 31 3f 80 20 01 00 10 03 bc
+HU: 06
+CD: 04
+
+HU: 02 36 32 03 07
+CD: 10 02 33 20 01 10 03 01
+HU: 06
+CD: 04
+
+
+CD On
+==========================
+HU: 02 30 03 33               <= Activate Changer
+CD: 06
+HU: 04
+
+/REQ
+HU: 06
+CD: 02 30 03 33               <= Activated
+HU: 06
+REQ
+CD: 04
+
+HU: 02 31 03 32               <= Get parameters
+CD: 10 02 31 3f 80 20 01 00 10 03 bc
+HU: 06
+CD: 04
+
+HU: 02 36 32 03 07            <= Stop
+CD: 10 02 33 20 01 10 03 01
+HU: 06
+CD: 04
+
+
+Play
+==========================
+HU: 02 36 30 03 05
+CD: 10 02 33 22 01 10 03 03
+HU: 06
+CD: 04
+
+
+Stop
+==========================
+HU: 02 36 32 03 07
+CD: 10 02 33 20 01 10 03 01
+HU: 06
+CD: 04
+
+Next CD
+==========================
+HU: 02 36 3a 03 0f             <= repeats after 12ms
+CD: 10 02 33 2a 00 10 03 0a
+HU: 06
+CD: 04
+
+/REQ
+HU: 06
+CD: 10 02 33 2a 00 10 03 0a
+HU: 06
+REQ
+CD: 04
+
+Prev CD
+==========================
+HU: 02 36 3b 03 0e             <= repeats after 12ms
+CD: 10 02 33 2a 00 10 03 0a
+HU: 06
+CD: 04
+
+/REQ
+HU: 06
+CD: 10 02 33 2a 00 10 03 0a
+HU: 06
+REQ
+CD: 04
+
+
+Next track
+==========================
+HU: 02 36 33 03 06
+CD: 10 02 33 24 01 10 03 05
+HU: 06
+CD: 04
+
+CD: Status message
+
+
+Prev track
+==========================
+HU: 02 36 34 03 01
+CD: 10 02 33 25 01 10 03 04
+HU: 06
+CD: 04
+
+Fast Forward
+==========================
+HU: 02 36 35 03 00            <= FF pressed
+CD: 10 02 33 26 01 10 03 07
+HU: 06
+CD: 04
+
+
+HU: 02 36 36 03 03            <= FF released
+CD: 10 02 33 22 01 10 03 03
+HU: 06
+CD: 04
+
+
+PROG after initial power on + disk scan
+==========================
+HU: 02 30 03 33 //cmd activate
+CD: 06
+HU: 04
+
+/REQ
+HU: 06
+CD: 02 30 03 33 //report activated
+HU: 06
+REQ
+CD: 04
+
+HU: 02 31 03 32
+CD: 10 02 31 00 00 20 00 00 10 03 02 //going to enumerate cds
+//##CD: 10 02 31 3f 80 20 01 00 10 03 bc //readily available params (powerOn)
+//##CD: 10 02 31 3f 80 25 01 00 10 03 b9
+HU: 06
+CD: 04
+
+//after 18.67s
+
+/REQ
+HU: 06
+CD: 10 02 32 3f 80 10 03 9e //CDs scan done?
+HU: 06
+REQ
+CD: 04
+
+//after 4.254s
+
+/REQ
+HU: 06
+CD: 10 02 33 20 01 10 03 01 //stopped or operation finished
+HU: 06
+REQ
+CD: 04
+
+//after 7.9s repeat of PROG
+
+HU: 02 30 03 33
+CD: 06
+HU: 04
+
+/REQ
+HU: 06
+CD: 02 30 03 33
+HU: 06
+REQ
+CD: 04
+
+HU: 02 31 03 32
+CD: 10 02 31 3f 80 20 01 00 10 03 bc
+HU: 06
+CD: 04
+
+HU: 02 36 32 03 07
+CD: 10 02 33 20 01 10 03 01
+HU: 06
+CD: 04
+
+//after 4.76s repeat of PROG
+
+HU: 02 30 03 33
+CD: 06
+HU: 04
+
+/REQ
+HU: 06
+CD: 02 30 03 33
+HU: 06
+REQ
+CD: 04
+
+HU: 02 31 03 32
+CD: 10 02 31 3f 80 20 01 00 10 03 bc
+HU: 06
+CD: 04
+
+// after 4.7s repeat PROG
+//...
+
+HU: 02 36 32 03 07          //Stop cmd
+CD: 10 02 33 20 01 10 03 01 //stopped
+HU: 06
+CD: 04
+
+HU: 02 36 30 03 05
+CD: 10 02 33 22 01 10 03 04
+//##CD: 10 02 33 25 01 10 03 04
+HU: 06
+CD: 04
+
+/REQ
+HU: 06
+CD: 02 35 30 31 30 31 30 30 30 30 03 36 // 0 sec play
+HU: 06
+REQ
+CD: 04
+
+//after 3.6s
+
+/REQ
+HU: 06
+CD: 02 35 30 31 30 31 30 30 30 31 03 37 // +1 sec of play
+HU: 06
+REQ
+CD: 04
+
+//after 1s
+
+/REQ
+HU: 06
+CD: 02 35 30 31 30 31 30 30 30 32 03 34 // +2 sec of play
+HU: 06
+REQ
+CD: 04
+
+//continue on each 1 sec of play time
+//,,,,
+
+//pressed Next Track
+HU: 02 36 33 03 06
+CD: 10 02 33 24 01 10 03 05
+HU: 06
+CD: 04
+
+/REQ
+HU: 06
+CD: 02 35 30 31 30 32 30 30 30 30 03 35 // 2nd track playing
+HU: 06
+REQ
+CD: 04
+
+//after 0.33 sec
+
+/REQ
+HU: 06
+CD: 10 02 33 22 01 10 03 03 // Next track cmd executed
+HU: 06
+REQ
+CD: 04
+
+//each second play info
+
+/REQ
+HU: 06
+CD: 02 35 30 31 30 32 30 30 30 31 03 34 // +1 sec of play 
+HU: 06
+REQ
+CD: 04
+
+//,,,,,
+
+//Next CD Pressed
+
+HU: 02 36 3a 03 0f
+CD: 10 02 33 2a 00 10 03 0a
+HU: 06
+CD: 04
+
+/REQ
+HU: 06
+CD: 10 02 33 2a 00 10 03 0a // Next CD cmd executed
+HU: 06
+REQ
+CD: 04
+
+
+/REQ
+HU: 06
+CD: 02 35 30 32 30 31 30 30 30 30 03 35 // 2nd CD playing
+HU: 06
+REQ
+CD: 04
+
+
+//play info each second
+
+
+
+-----------------------------------
+
+/REQ
+HU: 06
+CD: 10 02 33 24 01 10 03 05
+HU: 06
+REQ
+CD: 04
+
+/REQ
+HU: 06
+CD: 10 02 33 22 01 10 03 03
+HU: 06
+REQ
+CD: 04
+
+
+HU: 02 36 3c 03 09
+CD: 10 02 33 22 05 10 03 07
+HU: 06
+CD: 04
+
+/REQ
+HU: 06
+CD: 10 02 33 22 05 10 03 07
+HU: 06
+REQ
+CD: 04
+
+
+HU: 02 36 3d 03 08
+CD: 10 02 33 22 09 10 03 0b  <=
+HU: 02 3d 08                 <= scratch?
+CD: 10 02 33 22 09 10 03 0b. <= repeat
+HU: 06
+CD: 04
+
+
+HU: 02 36 3e 03 0b
+CD: 10 02 33 22 0d 10 03 0f
+HU: 06
+CD: 04
+
+
+
+Changer Play status (once per second)
+======================
+02 35 DD DD TT TT MM MM SS SS 03 AA - CD information packet
+
+where:
+  02 - STX start of text
+  35 - Device Status? - display
+  DD DD - disk # 00...15 in ascii
+  TT TT - track # 00...99 in ascii
+  MM MM - minutes 00...99 in ascii
+  SS SS - seconds 00...59 in ascii
+  03 - ETX end of text
+  AA - CRC
+
+Example:
+
+REQ: /REQ
+HU: 06
+CD: 02 35 30 36 30 31 30 30 31 30 03 30
+HU: 06
+REQ: REQ
+CD: 04
+
+
+Disk 06
+Track 01
+Minutes 00
+Seconds 10
+
+Disks scan
+=====================
+10 02 33 20 00 10 03 00
+04
+10 02 33 20 01 10 03 01
+04
+10 02 33 20 03 10 03 03
+04
+
+10 02 32 38 80 10 03 99
+04
