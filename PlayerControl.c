@@ -256,19 +256,19 @@ void SelectActiveSource()
 	Player_LoadState();
 }
 
-inline void SchedulePlay()
+/*inline*/ void SchedulePlay()
 {
 	playFlag = true;
 	gDelayFlag = (gTime + 10) % 100 + 1;
 }
 
-inline void ScheduleRequestCurrTrack()
+/*inline*/ void ScheduleRequestCurrTrack()
 {
 	requestFlag = true;
 	gDelayFlag = (gTime + 20) % 100 + 1;
 }
 
-inline void ScheduleTotalFiles()
+/*inline*/ void ScheduleTotalFiles()
 {
 	totalFilesFlag = true;
 	gDelayFlag = (gTime + 80) % 200 + 1;
@@ -446,12 +446,12 @@ void SendCmd(const uint8_t* cmd, uint8_t size)
 static const uint8_t reset[]	    = { 6, eReset,			0, 0, 0 };
 
 //Playback control
-//static const uint8_t playNext[] 	= { 6, ePlayNext, 		1, 0, 0 };
-//static const uint8_t playPrev[] 	= { 6, ePlayPrev, 		1, 0, 0 };
+static const uint8_t playNext[] 	= { 6, ePlayNext, 		1, 0, 0 };
+static const uint8_t playPrev[] 	= { 6, ePlayPrev, 		1, 0, 0 };
 
-static uint8_t setTrack[] 	        = { 6, ePlayTrackNo, 	1, 0, 0 };
+//static uint8_t setTrack[] 	        = { 6, ePlayTrackNo, 	1, 0, 0 };
 
-//static const uint8_t play[] 		= { 6, ePlayback, 		1, 0, 0 };
+static const uint8_t play[] 		= { 6, ePlayback, 		1, 0, 0 };
 static const uint8_t pause[] 		= { 6, ePause, 			1, 0, 0 };
 
 //static const uint8_t selectUsb[] 	= { 6, eSelectSource, 	1, 0, 0 };
@@ -460,13 +460,13 @@ static const uint8_t pause[] 		= { 6, ePause, 			1, 0, 0 };
 //static uint8_t setFileFolder[] 			= { 6, eSetFileFolder, 	1, 0, 0 };
 
 //Playback mode
-//static const uint8_t disableLoop[] 	= { 6, eLoopMode, 		1, 0, 0 };
-//static const uint8_t enableLoop[] 	= { 6, eLoopMode, 		1, 0, 1 };
-//static const uint8_t enableRandom[] = { 6, eRandomPlay, 	1, 0, 0 };
+static const uint8_t disableLoop[] 	= { 6, eLoopMode, 		1, 0, 1 };
+static const uint8_t enableLoop[] 	= { 6, eLoopMode, 		1, 0, 0 };
+static const uint8_t enableRandom[]   = { 6, eRandomPlay, 	       1, 0, 0 };
 
 //static uint8_t loopFolder[] 		= { 6, eLoopFolder, 	0, 0, 0 };
 
-//static const uint8_t loopFile[] 	= { 6, eLoopFile, 		0, 0, 0 };
+static const uint8_t loopFile[] 	= { 6, eLoopFile, 		0, 0, 0 };
 
 static uint8_t queryInitialize[] 	= { 6, eInitialize, 	0, 0, 1 };
 
@@ -491,6 +491,11 @@ void Player_InitializeSd()
 	gPlay.device = 2;
 	queryInitialize[4] = 2;
 	SendCmd(queryInitialize, sizeof(queryInitialize));
+}
+
+void Player_Play()
+{
+	SendCmd(play, sizeof(play));
 }
 
 void Player_Pause()
@@ -527,7 +532,7 @@ void Player_PlayNext()
 
 	UpdateFolder();
 
-	Player_PlayTrack();
+	SendCmd(playNext, sizeof(playNext));
 }
 
 void Player_PlayPrev() //in current folder
@@ -559,15 +564,15 @@ void Player_PlayPrev() //in current folder
 
 	UpdateFolder();
 
-	Player_PlayTrack();
+	SendCmd(playPrev, sizeof(playPrev));
 }
 
-void Player_PlayTrack()
-{
-	setTrack[3] = gPlay.file[1];
-	setTrack[4] = gPlay.file[0];
-	SendCmd(setTrack, sizeof(setTrack));
-}
+//void Player_PlayTrack()
+//{
+//	setTrack[3] = gPlay.file[1];
+//	setTrack[4] = gPlay.file[0];
+//	SendCmd(setTrack, sizeof(setTrack));
+//}
 
 void CalcFileNum()
 {
@@ -592,7 +597,7 @@ void Player_NextFolder()
 
 	CalcFileNum();
 
-	Player_PlayTrack();
+	Player_PlayNext(); //Temp
 }
 
 void Player_PrevFolder()
@@ -606,28 +611,28 @@ void Player_PrevFolder()
 
 	CalcFileNum();
 
-	Player_PlayTrack();
+	Player_PlayPrev(); //Temp
 }
 
-//void PlayNormal()
-//{
-//	SendCmd(disableLoop, sizeof(disableLoop));
-//}
-//
-//void PlayLoopAll()
-//{
-//	SendCmd(enableLoop, sizeof(enableLoop));
-//}
-//
-//void PlayLoopOne()
-//{
-//	SendCmd(loopFile, sizeof(loopFile));
-//}
-//
-//void PlayAllRandom()
-//{
-//	SendCmd(enableRandom, sizeof(enableRandom));
-//}
+void PlayNormal()
+{
+	SendCmd(disableLoop, sizeof(disableLoop));
+}
+
+void PlayLoopAll()
+{
+	SendCmd(enableLoop, sizeof(enableLoop));
+}
+
+void PlayLoopOne()
+{
+	SendCmd(loopFile, sizeof(loopFile));
+}
+
+void PlayAllRandom()
+{
+	SendCmd(enableRandom, sizeof(enableRandom));
+}
 
 void RequestCurrDevice()
 {

@@ -245,7 +245,7 @@ void RcvCommand()
 			case 0x60: // Play
 				gPlay.loopMode = All;
 				StartPlayback();
-				Player_PlayTrack();
+				Player_Play();
 				break;
 			case 0x62: // Stop
 				StopPlayback();
@@ -288,18 +288,22 @@ void RcvCommand()
 			case 0x6c:
 				gPlay.loopMode = None;
 				StartPlayback();
+				PlayNormal();
 				break;
 			case 0x6d:
 				gPlay.loopMode = One;
 				StartPlayback();
+				PlayLoopOne();
 				break;
 			case 0x6e:
 				gPlay.loopMode = RandomAll;
 				StartPlayback();
+				PlayAllRandom();
 				break;
 			case 0x6f:
 				gPlay.loopMode = All;
 				StartPlayback();
+				PlayLoopAll();
 				break;
 			default:
 				ResetReceiveCommand();
