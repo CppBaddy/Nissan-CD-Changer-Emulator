@@ -2,6 +2,12 @@ CC=avr-gcc
 
 DEVICE=85
 
+#Signature
+#ATtiny25 0x1E 0x91 0x08
+#ATtiny45 0x1E 0x92 0x06
+#ATtiny85 0x1E 0x93 0x0B
+
+#Fuses
 EFUSE=0xff
 HFUSE=0xdf
 LFUSE=0x62
@@ -33,7 +39,7 @@ program : flash eeprom
 #program : flash
 
 fuse :
-	$(UISP) -p m$(DEVICE) -c USBasp -v -U hfuse:w:${HFUSE}:m -U lfuse:w:${LFUSE}:m 
+	$(UISP) -p t$(DEVICE) -c USBasp -v -U hfuse:w:${HFUSE}:m -U lfuse:w:${LFUSE}:m 
 
 flash : $(TARGET).hex
 	$(UISP) -p t$(DEVICE) -c USBasp -v -U flash:w:$(TARGET).hex:i
