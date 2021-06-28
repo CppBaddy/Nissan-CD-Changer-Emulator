@@ -33,7 +33,7 @@ program : flash eeprom
 #program : flash
 
 fuse :
-	$(UISP) -p m$(DEVICE) -c USBasp -v -U hfuse:w:${HFUSE}:m -U lfuse:w:${LFUSE}:m 
+	$(UISP) -p t$(DEVICE) -c USBasp -v -U hfuse:w:${HFUSE}:m -U lfuse:w:${LFUSE}:m 
 
 flash : $(TARGET).hex
 	$(UISP) -p t$(DEVICE) -c USBasp -v -U flash:w:$(TARGET).hex:i
