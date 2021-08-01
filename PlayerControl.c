@@ -44,10 +44,10 @@ struct PlayerState gPlay =
 	.device     = UsbDrive,
 	.deviceMask = UsbDrive,
 	.loopMode   = All,
-	.folder	    = 3,
+	.folder	    = 1,
 	.folderSize = FolderSize,
 	.maxFolders = MaxFolderNum,
-	.fileNum    = 33,
+	.fileNum    = 1,
 	.totalFiles = MaxFileNum
 };
 
@@ -78,6 +78,8 @@ static uint8_t state = WaitForMessage;
 static uint16_t crc = 0;
 static uint8_t rcvBuff[6];
 static uint8_t idx = 0;
+
+static uint8_t requested = 0;
 
 static void Reset()
 {
@@ -214,44 +216,44 @@ void Player_Update()
 
 void Player_LoadState()
 {
-//	switch(gPlay.device)
-//	{
-//	case UsbDrive:
+	switch(gPlay.device)
+	{
+	case UsbDrive:
 		LoadUsbState();
-//		break;
-//	case SdCard:
-//		LoadSdState();
-//		break;
-//	default:
-//		break;
-//	}
+		break;
+	case SdCard:
+		LoadSdState();
+		break;
+	default:
+		break;
+	}
 }
 
 void SaveState()
 {
-//	switch(gPlay.device)
-//	{
-//	case UsbDrive:
+	switch(gPlay.device)
+	{
+	case UsbDrive:
 		StoreUsbState();
-//		break;
-//	case SdCard:
-//		StoreSdState();
-//		break;
-//	default:
-//		break;
-//	}
+		break;
+	case SdCard:
+		StoreSdState();
+		break;
+	default:
+		break;
+	}
 }
 
 void SelectActiveSource()
 {
-//	if(gPlay.deviceMask & UsbDrive)
-//	{
+	if(gPlay.deviceMask & UsbDrive)
+	{
 		gPlay.device = UsbDrive;
-//	}
-//	else if(gPlay.deviceMask & SdCard)
-//	{
-//		gPlay.device = SdCard;
-//	}
+	}
+	else if(gPlay.deviceMask & SdCard)
+	{
+		gPlay.device = SdCard;
+	}
 
 	Player_LoadState();
 }
@@ -334,7 +336,15 @@ static void HandleMessage()
 
 			UpdateFolder();
 
-			SaveState();
+			if(requested) //this gets requested after play cmd
+			{
+                requested = 0;
+			    SaveState();
+			}
+			else //track ended notification for mh2024
+			{
+		        SchedulePlay();
+			}
 		}
 		else
 		{
@@ -443,13 +453,13 @@ void SendCmd(const uint8_t* cmd, uint8_t size)
 // 		folder - 01 to 99
 // 		file   - 001 to 256
 
-static const uint8_t reset[]	    = { 6, eReset,			0, 0, 0 };
+//static const uint8_t reset[]	    = { 6, eReset,			1, 0, 0 };
 
 //Playback control
 static const uint8_t playNext[] 	= { 6, ePlayNext, 		1, 0, 0 };
 static const uint8_t playPrev[] 	= { 6, ePlayPrev, 		1, 0, 0 };
 
-//static uint8_t setTrack[] 	        = { 6, ePlayTrackNo, 	1, 0, 0 };
+static uint8_t setTrack[] 	        = { 6, ePlayTrackNo, 	1, 0, 0 };
 
 static const uint8_t play[] 		= { 6, ePlayback, 		1, 0, 0 };
 static const uint8_t pause[] 		= { 6, ePause, 			1, 0, 0 };
@@ -462,21 +472,21 @@ static const uint8_t pause[] 		= { 6, ePause, 			1, 0, 0 };
 //Playback mode
 static const uint8_t disableLoop[] 	= { 6, eLoopMode, 		1, 0, 1 };
 static const uint8_t enableLoop[] 	= { 6, eLoopMode, 		1, 0, 0 };
-static const uint8_t enableRandom[]   = { 6, eRandomPlay, 	       1, 0, 0 };
+static const uint8_t enableRandom[]   = { 6, eRandomPlay, 	1, 0, 0 };
 
-//static uint8_t loopFolder[] 		= { 6, eLoopFolder, 	0, 0, 0 };
+//static uint8_t loopFolder[] 		= { 6, eLoopFolder, 	1, 0, 0 };
 
-static const uint8_t loopFile[] 	= { 6, eLoopFile, 		0, 0, 0 };
+static const uint8_t loopFile[] 	= { 6, eLoopFile, 		1, 0, 0 };
 
-static uint8_t queryInitialize[] 	= { 6, eInitialize, 	0, 0, 1 };
+static uint8_t queryInitialize[] 	= { 6, eInitialize, 	1, 0, 1 };
 
-static const uint8_t queryPlayState[] 		= { 6, eStatus, 0, 0, 0 };
+static const uint8_t queryPlayState[] 		= { 6, eStatus, 1, 0, 0 };
 
-static const uint8_t queryTotalUsbFiles[] 	= { 6, eUSBTotalFiles, 0, 0, 0 };
-static const uint8_t queryTotalSdFiles[] 	= { 6, eSDTotalFiles, 	0, 0, 0 };
+static const uint8_t queryTotalUsbFiles[] 	= { 6, eUSBTotalFiles, 1, 0, 0 };
+static const uint8_t queryTotalSdFiles[] 	= { 6, eSDTotalFiles,  1, 0, 0 };
 
-static const uint8_t queryCurrUsbFile[] = { 6, eUSBCurrFile, 0, 0, 0 };
-static const uint8_t queryCurrSdFile[] 	= { 6, eSDCurrFile,	 0, 0, 0 };
+static const uint8_t queryCurrUsbFile[] = { 6, eUSBCurrFile, 1, 0, 0 };
+static const uint8_t queryCurrSdFile[] 	= { 6, eSDCurrFile,	 1, 0, 0 };
 
 
 void Player_InitializeUsb()
@@ -567,12 +577,12 @@ void Player_PlayPrev() //in current folder
 	SendCmd(playPrev, sizeof(playPrev));
 }
 
-//void Player_PlayTrack()
-//{
-//	setTrack[3] = gPlay.file[1];
-//	setTrack[4] = gPlay.file[0];
-//	SendCmd(setTrack, sizeof(setTrack));
-//}
+void Player_PlayTrack()
+{
+	setTrack[3] = gPlay.file[1];
+	setTrack[4] = gPlay.file[0];
+	SendCmd(setTrack, sizeof(setTrack));
+}
 
 void CalcFileNum()
 {
@@ -597,7 +607,7 @@ void Player_NextFolder()
 
 	CalcFileNum();
 
-	Player_PlayNext(); //Temp
+	Player_PlayTrack();
 }
 
 void Player_PrevFolder()
@@ -611,7 +621,7 @@ void Player_PrevFolder()
 
 	CalcFileNum();
 
-	Player_PlayPrev(); //Temp
+	Player_PlayTrack();
 }
 
 void PlayNormal()
@@ -641,30 +651,32 @@ void RequestCurrDevice()
 
 void RequestCurrTrack()
 {
-//	switch(gPlay.device)
-//	{
-//	case UsbDrive:
+	switch(gPlay.device)
+	{
+	case UsbDrive:
+        requested = 1;
 		SendCmd(queryCurrUsbFile, sizeof(queryCurrSdFile));
-//		break;
-//	case SdCard:
-//		SendCmd(queryCurrSdFile, sizeof(queryCurrSdFile));
-//		break;
-//	default:
-//		break;
-//	}
+		break;
+	case SdCard:
+	    requested = 1;
+		SendCmd(queryCurrSdFile, sizeof(queryCurrSdFile));
+		break;
+	default:
+		break;
+	}
 }
 
 void RequestTotalFiles()
 {
-//	switch(gPlay.device)
-//	{
-//	case UsbDrive:
+	switch(gPlay.device)
+	{
+	case UsbDrive:
 		SendCmd(queryTotalUsbFiles, sizeof(queryTotalUsbFiles));
-//		break;
-//	case SdCard:
-//		SendCmd(queryTotalSdFiles, sizeof(queryTotalSdFiles));
-//		break;
-//	default:
-//		break;
-//	}
+		break;
+	case SdCard:
+		SendCmd(queryTotalSdFiles, sizeof(queryTotalSdFiles));
+		break;
+	default:
+		break;
+	}
 }

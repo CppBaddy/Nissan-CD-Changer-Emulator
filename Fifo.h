@@ -23,7 +23,7 @@
 
 enum
 {
-    MAX_FIFO_BUF_SIZE = 16
+    MAX_FIFO_BUF_SIZE = 32
 };
 
 struct Fifo
