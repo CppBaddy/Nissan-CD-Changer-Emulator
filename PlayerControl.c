@@ -256,19 +256,19 @@ void SelectActiveSource()
 	Player_LoadState();
 }
 
-inline void SchedulePlay()
+/*inline*/ void SchedulePlay()
 {
 	playFlag = true;
 	gDelayFlag = (gTime + 10) % 100 + 1;
 }
 
-inline void ScheduleRequestCurrTrack()
+/*inline*/ void ScheduleRequestCurrTrack()
 {
 	requestFlag = true;
 	gDelayFlag = (gTime + 20) % 100 + 1;
 }
 
-inline void ScheduleTotalFiles()
+/*inline*/ void ScheduleTotalFiles()
 {
 	totalFilesFlag = true;
 	gDelayFlag = (gTime + 80) % 200 + 1;
