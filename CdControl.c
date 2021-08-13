@@ -245,7 +245,7 @@ void RcvCommand()
 			case 0x60: // Play
 				gPlay.loopMode = All;
 				StartPlayback();
-				Player_Play();
+				Player_PlayNext();
 				break;
 			case 0x62: // Stop
 				StopPlayback();
