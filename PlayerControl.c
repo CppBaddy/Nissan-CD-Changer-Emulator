@@ -329,7 +329,7 @@ static void HandleMessage()
 
 	case eUSBCurrFile:
 	case eSDCurrFile:
-		if(rcvBuff[2] && rcvBuff[3]) //if file num > 0
+		if(rcvBuff[2] || rcvBuff[3]) //if file num > 0
 		{
 			gPlay.file[0] = rcvBuff[3];
 			gPlay.file[1] = rcvBuff[2];
