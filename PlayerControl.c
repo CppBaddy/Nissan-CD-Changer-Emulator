@@ -461,6 +461,9 @@ static const uint8_t playPrev[] 	= { 6, ePlayPrev, 		1, 0, 0 };
 
 static uint8_t setTrack[] 	        = { 6, ePlayTrackNo, 	1, 0, 0 };
 
+static uint8_t setVolume[]          = { 6, eSetVolume,      1, 0, 28 };
+static uint8_t setEqualizer[]       = { 6, eSetEq,          1, 0, 0 };
+
 static const uint8_t play[] 		= { 6, ePlayback, 		1, 0, 0 };
 static const uint8_t pause[] 		= { 6, ePause, 			1, 0, 0 };
 
@@ -488,6 +491,14 @@ static const uint8_t queryTotalSdFiles[] 	= { 6, eSDTotalFiles,  1, 0, 0 };
 static const uint8_t queryCurrUsbFile[] = { 6, eUSBCurrFile, 1, 0, 0 };
 static const uint8_t queryCurrSdFile[] 	= { 6, eSDCurrFile,	 1, 0, 0 };
 
+
+void Player_Initialize()
+{
+    SendCmd(setVolume, sizeof(setVolume));
+    SendCmd(setEqualizer, sizeof(setEqualizer));
+
+    Player_PlayNext();
+}
 
 void Player_InitializeUsb()
 {

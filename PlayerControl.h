@@ -23,6 +23,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+void Player_Initialize();
+
 void Player_LoadState();
 
 void Player_Update();
