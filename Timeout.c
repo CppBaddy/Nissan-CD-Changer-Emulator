@@ -23,7 +23,7 @@
 
 #define TIMEOUT_MS		11
 
-#define kTimeoutTicks	106 //(TIMEOUT_MS * UART_9600BAUD)/1000
+#define kTimeoutTicks	156 //(TIMEOUT_MS * UART_9600BAUD)/1000
 #define kDelay1msTicks	15
 
 
