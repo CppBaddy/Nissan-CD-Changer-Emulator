@@ -38,4 +38,24 @@ extern volatile uint8_t gTimeOut;
 
 extern volatile uint8_t gDelayFlag;
 
+#define kTimeoutTicks	156 //(TIMEOUT_MS * UART_9600BAUD)/1000
+
+#define kDelay1msTicks	15
+
+inline void resetTimeout()
+{
+	gTimeOut = kTimeoutTicks;
+}
+
+inline void resetTimeout1ms()
+{
+	gTimeOut = kDelay1msTicks;
+}
+
+inline bool isTimedOut()
+{
+	return (0 == gTimeOut);
+}
+
+
 #endif /* TIMEOUT_H_ */

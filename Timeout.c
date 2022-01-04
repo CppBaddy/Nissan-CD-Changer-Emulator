@@ -23,8 +23,6 @@
 
 #define TIMEOUT_MS		11
 
-#define kTimeoutTicks	106 //(TIMEOUT_MS * UART_9600BAUD)/1000
-#define kDelay1msTicks	15
 
 
 volatile uint8_t gTime; //global Time
@@ -35,18 +33,5 @@ volatile uint8_t gTimeOut;
 volatile uint8_t gDelayFlag;
 
 
-inline void resetTimeout()
-{
-	gTimeOut = kTimeoutTicks;
-}
 
-inline void resetTimeout1ms()
-{
-	gTimeOut = kDelay1msTicks;
-}
-
-inline bool isTimedOut()
-{
-	return (0 == gTimeOut);
-}
 
