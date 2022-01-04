@@ -3,7 +3,7 @@ CC=avr-gcc
 DEVICE=85
 
 EFUSE=0xff
-HFUSE=0xdf
+HFUSE=0xdc
 LFUSE=0x62
 
 CFLAGS=-g -std=c11 -Os -Wall -mcall-prologues -mmcu=attiny$(DEVICE) -DF_CPU=8000000
