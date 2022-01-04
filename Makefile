@@ -1,4 +1,4 @@
-CC=avr-gcc
+CC=avr-g++
 
 DEVICE=85
 
@@ -9,10 +9,10 @@ DEVICE=85
 
 #Fuses
 EFUSE=0xff
-HFUSE=0xdf
+HFUSE=0xdc
 LFUSE=0x62
 
-CFLAGS=-g -std=c11 -Os -Wall -mcall-prologues -mmcu=attiny$(DEVICE) -DF_CPU=8000000
+CFLAGS=-g -std=c++11 -Os -Wall -mcall-prologues -mmcu=attiny$(DEVICE) -DF_CPU=8000000
 ## Use short (8-bit) data types
 CFLAGS += -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums
 
