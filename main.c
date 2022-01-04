@@ -29,11 +29,10 @@
 
 #include <avr/io.h>
 #include <avr/iotn85.h>
+#include <avr/sleep.h>
 #include <avr/wdt.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
-
-//#include <avr/eeprom.h>
 
 #include "PortConfig.h"
 #include "Uart.h"
@@ -54,9 +53,19 @@ int main( void )
 
     for(;;) //loop scheduler
     {
+    	wdt_reset();
+
     	Player_Update();
 
     	HeadUnit_Update();
+
+        set_sleep_mode(SLEEP_MODE_IDLE);
+
+        sleep_enable();
+
+            sleep_cpu();
+
+        sleep_disable();
     }
 
     return 0;
@@ -105,25 +114,15 @@ inline void setup()
     Mp_Init();
     Hu_Init();
 
+    WDT_Init();
+
     sei(); //Enable interrupts
 }
 
 void WDT_Init()
 {
-    cli();
-
     wdt_reset();
-
-    // Use Timed Sequence for disabling Watchdog System Reset Mode if it has been enabled unintentionally.
-    MCUSR &= ~_BV(WDRF);          // Clear WDRF if it has been unintentionally set.
-
-    WDTCR = _BV(WDCE) | _BV(WDE); // Enable configuration change.
-    WDTCR = _BV(WDIF) | _BV(WDIE) // Enable Watchdog Interrupt Mode.
-          | _BV(WDCE) | _BV(WDE)  // Disable Watchdog System Reset Mode if unintentionally enabled.
-          | _BV(WDP0);            // Set Watchdog Timeout period to 32 ms.
-    	  //; 			          // Set Watchdog Timeout period to 16 ms.
-
-    sei();
+    wdt_enable(WDTO_8S);
 }
 
 /* External input interrupt handler */
