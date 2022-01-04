@@ -182,6 +182,7 @@ ISR( TIMER0_COMPA_vect )
             Hu_SetTxPort(hu.txParity);
             break;
         case StopBit2:
+        {
             Hu_SetTxPort(1);
 
             volatile struct Fifo* fifo = &hu.txFifo;
@@ -193,6 +194,8 @@ ISR( TIMER0_COMPA_vect )
 
             hu.txState = Idle;
             break;
+        }
+
         default:
             break;
         }

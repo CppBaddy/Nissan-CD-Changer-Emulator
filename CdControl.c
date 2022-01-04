@@ -408,6 +408,7 @@ void SendPlayInfo()
 	switch (state)
 	{
 	case ReqIdleState:
+	{
 		playInfo[1] = 0x30 + gPlay.device / 10;
 		playInfo[2] = 0x30 + gPlay.device % 10;
 
@@ -426,6 +427,8 @@ void SendPlayInfo()
 		resetTimeout();
 		state = ReqWaitForAck;
 		break;
+	}
+
 	case ReqWaitForAck:
 		if (Hu_RxReady())
 		{
@@ -445,6 +448,7 @@ void SendPlayInfo()
 			gState = WaitForCommandState;
 		}
 		break;
+
 	case ReqWaitForAck2:
 		if (Hu_RxReady())
 		{
@@ -468,6 +472,7 @@ void SendPlayInfo()
 			gState = WaitForCommandState;
 		}
 		break;
+
 	default:
 		break;
 	}
