@@ -33,7 +33,6 @@ uint8_t EEMEM usbState[sizeof(struct PlayerState)] = {
 };
 
 
-/*
 uint8_t EEMEM sdState[sizeof(struct PlayerState)] = {
 		2,	//device SD
 		2,	//device mask SD
@@ -44,7 +43,6 @@ uint8_t EEMEM sdState[sizeof(struct PlayerState)] = {
 		1, 0, //file number
 		0xb7, 0xb //2999 total files
 };
-*/
 
 
 
@@ -57,24 +55,20 @@ void LoadUsbState()
 	eeprom_read_block(&gPlay, usbState, PERSISTENT_SIZE);
 }
 
-/*
 void LoadSdState()
 {
-	EEPROM_read_block(&gPlay, sdState, PERSISTENT_SIZE);
+	eeprom_read_block(&gPlay, sdState, PERSISTENT_SIZE);
 }
-*/
 
 void StoreUsbState()
 {
 	eeprom_update_block(&gPlay, usbState, PERSISTENT_SIZE);
 }
 
-/*
 void StoreSdState()
 {
-	EEPROM_update_block(&gPlay, sdState, PERSISTENT_SIZE);
+	eeprom_update_block(&gPlay, sdState, PERSISTENT_SIZE);
 }
-*/
 
 
 

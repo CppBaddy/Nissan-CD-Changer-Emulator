@@ -44,10 +44,10 @@ struct PlayerState gPlay =
 	.device     = UsbDrive,
 	.deviceMask = UsbDrive,
 	.loopMode   = All,
-	.folder	    = 3,
+	.folder	    = 1,
 	.folderSize = FolderSize,
 	.maxFolders = MaxFolderNum,
-	.fileNum    = 33,
+	.fileNum    = 1,
 	.totalFiles = MaxFileNum
 };
 
@@ -214,61 +214,61 @@ void Player_Update()
 
 void Player_LoadState()
 {
-//	switch(gPlay.device)
-//	{
-//	case UsbDrive:
+	switch(gPlay.device)
+	{
+	case UsbDrive:
 		LoadUsbState();
-//		break;
-//	case SdCard:
-//		LoadSdState();
-//		break;
-//	default:
-//		break;
-//	}
+		break;
+	case SdCard:
+		LoadSdState();
+		break;
+	default:
+		break;
+	}
 }
 
 void SaveState()
 {
-//	switch(gPlay.device)
-//	{
-//	case UsbDrive:
+	switch(gPlay.device)
+	{
+	case UsbDrive:
 		StoreUsbState();
-//		break;
-//	case SdCard:
-//		StoreSdState();
-//		break;
-//	default:
-//		break;
-//	}
+		break;
+	case SdCard:
+		StoreSdState();
+		break;
+	default:
+		break;
+	}
 }
 
 void SelectActiveSource()
 {
-//	if(gPlay.deviceMask & UsbDrive)
-//	{
+	if(gPlay.deviceMask & UsbDrive)
+	{
 		gPlay.device = UsbDrive;
-//	}
-//	else if(gPlay.deviceMask & SdCard)
-//	{
-//		gPlay.device = SdCard;
-//	}
+	}
+	else if(gPlay.deviceMask & SdCard)
+	{
+		gPlay.device = SdCard;
+	}
 
 	Player_LoadState();
 }
 
-/*inline*/ void SchedulePlay()
+inline void SchedulePlay()
 {
 	playFlag = true;
 	gDelayFlag = (gTime + 10) % 100 + 1;
 }
 
-/*inline*/ void ScheduleRequestCurrTrack()
+inline void ScheduleRequestCurrTrack()
 {
 	requestFlag = true;
 	gDelayFlag = (gTime + 20) % 100 + 1;
 }
 
-/*inline*/ void ScheduleTotalFiles()
+inline void ScheduleTotalFiles()
 {
 	totalFilesFlag = true;
 	gDelayFlag = (gTime + 80) % 200 + 1;
@@ -327,7 +327,7 @@ static void HandleMessage()
 
 	case eUSBCurrFile:
 	case eSDCurrFile:
-		if(rcvBuff[2] && rcvBuff[3]) //if file num > 0
+		if(rcvBuff[2] || rcvBuff[3]) //if file num > 0
 		{
 			gPlay.file[0] = rcvBuff[3];
 			gPlay.file[1] = rcvBuff[2];
@@ -443,7 +443,7 @@ void SendCmd(const uint8_t* cmd, uint8_t size)
 // 		folder - 01 to 99
 // 		file   - 001 to 256
 
-static const uint8_t reset[]	    = { 6, eReset,			0, 0, 0 };
+//static const uint8_t reset[]	    = { 6, eReset,			0, 0, 0 };
 
 //Playback control
 //static const uint8_t playNext[] 	= { 6, ePlayNext, 		1, 0, 0 };
@@ -636,30 +636,30 @@ void RequestCurrDevice()
 
 void RequestCurrTrack()
 {
-//	switch(gPlay.device)
-//	{
-//	case UsbDrive:
+	switch(gPlay.device)
+	{
+	case UsbDrive:
 		SendCmd(queryCurrUsbFile, sizeof(queryCurrSdFile));
-//		break;
-//	case SdCard:
-//		SendCmd(queryCurrSdFile, sizeof(queryCurrSdFile));
-//		break;
-//	default:
-//		break;
-//	}
+		break;
+	case SdCard:
+		SendCmd(queryCurrSdFile, sizeof(queryCurrSdFile));
+		break;
+	default:
+		break;
+	}
 }
 
 void RequestTotalFiles()
 {
-//	switch(gPlay.device)
-//	{
-//	case UsbDrive:
+	switch(gPlay.device)
+	{
+	case UsbDrive:
 		SendCmd(queryTotalUsbFiles, sizeof(queryTotalUsbFiles));
-//		break;
-//	case SdCard:
-//		SendCmd(queryTotalSdFiles, sizeof(queryTotalSdFiles));
-//		break;
-//	default:
-//		break;
-//	}
+		break;
+	case SdCard:
+		SendCmd(queryTotalSdFiles, sizeof(queryTotalSdFiles));
+		break;
+	default:
+		break;
+	}
 }
