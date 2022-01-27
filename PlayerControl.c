@@ -30,8 +30,6 @@ static void SaveState();
 static void SelectActiveSource();
 static void RequestTotalFiles();
 
-//TODO set watchdog timer to get initialized
-// send reset command if > 5 sec
 
 static void UpdateFolder()
 {
@@ -375,7 +373,7 @@ static void HandleMessage()
 
 	case eUSBTotalFiles:
 	case eSDTotalFiles:
-		if(rcvBuff[2] && rcvBuff[3])
+		if(rcvBuff[2] || rcvBuff[3])
 		{
 			gPlay.total[0] = rcvBuff[3];
 			gPlay.total[1] = rcvBuff[2];

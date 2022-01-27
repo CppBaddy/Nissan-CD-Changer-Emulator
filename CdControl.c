@@ -129,7 +129,7 @@ void HeadUnit_Update()
 
 			gState = WaitForCommandState;
 		}
-		else if(isTimedOut())
+		else if(isTimedOut()) //Sending requests for settings from HU
 		{
 			gReqIdle = !gReqIdle;
 
